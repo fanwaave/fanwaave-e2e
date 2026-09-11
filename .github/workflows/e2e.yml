@@ -35,3 +35,79 @@ jobs:
           name: ast-parser-cargo-lock
           path: tests/ast-parser-smoke/Cargo.lock
           if-no-files-found: error
+
+  flutter-config-suite:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Check out exact Fanwaave Flutter candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: fanwaave/fanwaave-flutter
+          ref: 833b0fc56cddaf123ba55080e9cb98b3bb1d1633
+          path: flutter
+          persist-credentials: false
+      - name: Verify exact Flutter candidate
+        working-directory: flutter
+        run: test "$(git rev-parse HEAD)" = "833b0fc56cddaf123ba55080e9cb98b3bb1d1633"
+      - name: Verify client-only config and secret boundaries
+        working-directory: flutter
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const read = (path) => fs.readFileSync(path, 'utf8');
+          const must = (value, message) => { if (!value) throw new Error(message); };
+
+          const cli = read('.cli-flags.toml');
+          must(cli.includes('[env]') && /load\s*=\s*false/.test(cli), 'dotenv loading must stay disabled');
+          must(/allow_unknown\s*=\s*false/.test(cli), 'unknown CLI flags must fail closed');
+          must(cli.includes('FANWAAVE_API_BASE_URL'), 'canonical API base URL key missing');
+          must(cli.includes('FANWAAVE_TENANT_ID'), 'tenant key missing');
+          must(!cli.includes('FANWAAVE_AUTH_TOKEN'), 'auth token must not be public argv');
+
+          const fanwaave = read('.fanwaave-cfg.toml');
+          must(/mode\s*=\s*"client"/.test(fanwaave), 'Fanwaave config must be client mode');
+          must(/require_audit\s*=\s*true/.test(fanwaave), 'flags2env audit must be required');
+          const authStart = fanwaave.indexOf('name = "auth_token"');
+          must(authStart >= 0, 'auth token binding missing');
+          const authTail = fanwaave.slice(authStart);
+          const nextEnv = authTail.indexOf('[[env]]', 1);
+          const authBlock = nextEnv >= 0 ? authTail.slice(0, nextEnv) : authTail;
+          must(authBlock.includes('key = "FANWAAVE_AUTH_TOKEN"'), 'auth token env key mismatch');
+          must(/secret\s*=\s*true/.test(authBlock), 'auth token must be marked secret');
+          must(!/^default\s*=/m.test(authBlock), 'auth token must not have a plaintext default');
+
+          const middleware = read('.ores-mw.toml');
+          must(middleware.includes('repository_mode = "client-only"'), 'middleware must be client-only');
+          must(middleware.includes('middleware = "propagation-only"'), 'middleware must be propagation-only');
+          for (const header of ['traceparent', 'baggage', 'x-request-id']) {
+            must(middleware.includes(header), `missing propagation header ${header}`);
+          }
+
+          const rl = read('.ores-rl.toml');
+          must(rl.includes('layout = "client-only"'), 'rate limit config must be client-only');
+          must(rl.includes('enforcementMode = "observe-only"'), 'client rate-limit metadata must be observe-only');
+          must(!/redis/i.test(rl), 'client rate-limit config must not project Redis');
+          must(!/hmac/i.test(rl), 'client rate-limit config must not project HMAC material');
+
+          const lru = read('.ores-lru.toml');
+          must(lru.includes('roles = ["client"]'), 'LRU role must remain client-only');
+          must(lru.includes('syncMode = "local_only"'), 'client LRU must stay local-only');
+
+          const auth = read('.auth-shared.toml');
+          must(auth.includes('https://github.com/shared-auth/shared-auth-interfaces'), 'Shared Auth authority missing');
+          const commit = auth.match(/commit\s*=\s*"([0-9a-f]{40})"/);
+          must(commit, 'Shared Auth authority must be pinned to a full commit');
+          NODE
+      - name: Install pinned Flutter SDK
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          flutter-version: '3.35.3'
+          channel: stable
+          cache: true
+      - name: Resolve Flutter dependencies
+        working-directory: flutter
+        run: flutter pub get
+      - name: Analyze Flutter client
+        working-directory: flutter
+        run: flutter analyze --fatal-infos
