@@ -1,0 +1,17 @@
+[package]
+name = "fanwaave-ast-parser-smoke"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.88"
+publish = false
+
+[dependencies]
+tree-sitter = "=0.26.13"
+# 0.1.8 requires Rust 1.90; pin 0.1.7 so the grammar crates remain compatible
+# with the fleet MSRV while still sharing the modern LanguageFn boundary.
+tree-sitter-language = "=0.1.7"
+tree-sitter-rust = "=0.24.2"
+tree-sitter-typescript = "=0.23.2"
+tree-sitter-go = "=0.25.0"
+tree-sitter-gleam = "=1.0.0"
+tree-sitter-dart = "=0.2.0"
