@@ -72,7 +72,7 @@ pub fn main() {
   print(config);
 }
 "#,
-            "program",
+            "source_file",
         );
     }
 
