@@ -26,7 +26,7 @@ jobs:
           toolchain: 1.88.0
       - name: Resolve pinned parser graph
         run: cargo tree --manifest-path tests/ast-parser-smoke/Cargo.toml
-      - name: Parse Rust TypeScript Go Gleam and Dart fixtures
+      - name: Parse fleet fixtures and generated env parity cases
         run: cargo test --manifest-path tests/ast-parser-smoke/Cargo.toml --all-targets
       - name: Retain resolved parser lockfile
         if: ${{ always() }}
