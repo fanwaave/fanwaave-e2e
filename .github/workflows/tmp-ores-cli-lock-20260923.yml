@@ -40,7 +40,7 @@ jobs:
           set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add tmp/ores-cli-lock/Cargo.lock
+          git add -f tmp/ores-cli-lock/Cargo.lock
           test -n "$(git diff --cached --name-only)"
           git commit -m 'chore: resolve ores-cli Cargo.lock'
           git push origin HEAD:tmp/ores-cli-lock-20260923
