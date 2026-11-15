@@ -38,47 +38,7 @@ jobs:
           FANWAAVE_CLIENTS_CHECKOUT: ../external/fanwaave-clients
           FANWAAVE_INTERFACES_CHECKOUT: ../external/fanwaave-interfaces
         run: node tests/atto-contracts.e2e.mjs
-
-  atto-compiler:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          path: e2e
-          persist-credentials: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: fanwaave/fanwaave-clients
-          ref: 5edaedc737225aaab0c7034ef2583bee050d7d3a
-          path: external/fanwaave-clients
-          persist-credentials: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: fanwaave/fanwaave-interfaces
-          ref: 9497815547dff06218bdb74426ac06f61f2b74ea
-          path: external/fanwaave-interfaces
-          persist-credentials: false
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
-        with:
-          repository: atto-lang/atto-source.rs
-          ref: d06f76c3c5567b66168365caed11150ed6c95a3d
-          path: external/atto-source
-          persist-credentials: false
-      - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
-        with:
-          toolchain: 1.88.0
-      - name: Verify exact toolchain and source commits
-        run: |
-          test "$(git -C external/fanwaave-clients rev-parse HEAD)" = "5edaedc737225aaab0c7034ef2583bee050d7d3a"
-          test "$(git -C external/fanwaave-interfaces rev-parse HEAD)" = "9497815547dff06218bdb74426ac06f61f2b74ea"
-          test "$(git -C external/atto-source rev-parse HEAD)" = "d06f76c3c5567b66168365caed11150ed6c95a3d"
-      - name: Build the native AttoLang compiler
-        run: cargo build --release --locked --manifest-path external/atto-source/Cargo.toml --bin attoc
-      - name: Compile and execute real AttoLang policy guards
-        working-directory: e2e
-        env:
-          FANWAAVE_CLIENTS_CHECKOUT: ../external/fanwaave-clients
-          FANWAAVE_INTERFACES_CHECKOUT: ../external/fanwaave-interfaces
-          ATTOC: ../external/atto-source/target/release/attoc
-        run: node tests/atto-execution.e2e.mjs
+# NOTE: The real compiler harness in tests/atto-execution.e2e.mjs is retained
+# for a future independently reviewed, token-free mirror. The canonical
+# atto-lang/atto-source.rs is PRIVATE: this GITHUB_TOKEN cannot check it out.
+# Do not add credentials, skip gates, or treat static tests as compile proof.
