@@ -5,7 +5,14 @@ use std::path::PathBuf;
 
 fn root(env: &str, fallback: &str) -> PathBuf {
     let path = std::env::var(env).unwrap_or_else(|_| fallback.to_owned());
-    PathBuf::from(path)
+    let source = PathBuf::from(path);
+    if source.is_absolute() {
+        source
+    } else {
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../..")
+            .join(source)
+    }
 }
 fn read_json(root: &PathBuf, relative: &str) -> Value {
     let content = fs::read_to_string(root.join(relative)).expect("read exact candidate file");
