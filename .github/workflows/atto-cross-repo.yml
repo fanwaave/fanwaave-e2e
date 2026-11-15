@@ -1,0 +1,40 @@
+name: AttoLang cross-repository contract gate
+on:
+  push:
+    branches: [dev]
+    paths: ['tests/atto-contracts.e2e.mjs', '.github/workflows/atto-cross-repo.yml']
+  pull_request:
+    paths: ['tests/atto-contracts.e2e.mjs', '.github/workflows/atto-cross-repo.yml']
+permissions:
+  contents: read
+jobs:
+  atto:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          path: e2e
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: fanwaave/fanwaave-clients
+          ref: 5edaedc737225aaab0c7034ef2583bee050d7d3a
+          path: external/fanwaave-clients
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: fanwaave/fanwaave-interfaces
+          ref: 9497815547dff06218bdb74426ac06f61f2b74ea
+          path: external/fanwaave-interfaces
+          persist-credentials: false
+      - name: Verify exact candidate SHAs
+        run: |
+          test "$(git -C external/fanwaave-clients rev-parse HEAD)" = "5edaedc737225aaab0c7034ef2583bee050d7d3a"
+          test "$(git -C external/fanwaave-interfaces rev-parse HEAD)" = "9497815547dff06218bdb74426ac06f61f2b74ea"
+      - name: Check peer AttoLang contract bindings
+        working-directory: e2e
+        env:
+          FANWAAVE_CLIENTS_CHECKOUT: ../external/fanwaave-clients
+          FANWAAVE_INTERFACES_CHECKOUT: ../external/fanwaave-interfaces
+        run: node tests/atto-contracts.e2e.mjs
