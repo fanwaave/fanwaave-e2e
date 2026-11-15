@@ -19,7 +19,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: fanwaave/fanwaave-clients
-          ref: 4eee096352a714dd27487e685710827f370b260d
+          ref: ccee778740af47384f221b3b6f99c48258873ec2
           path: external/fanwaave-clients
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -30,7 +30,7 @@ jobs:
           persist-credentials: false
       - name: Verify exact candidate SHAs
         run: |
-          test "$(git -C external/fanwaave-clients rev-parse HEAD)" = "4eee096352a714dd27487e685710827f370b260d"
+          test "$(git -C external/fanwaave-clients rev-parse HEAD)" = "ccee778740af47384f221b3b6f99c48258873ec2"
           test "$(git -C external/fanwaave-interfaces rev-parse HEAD)" = "4c81583c33bfab187ac4520b87f416550a4aed71"
       - name: Check peer AttoLang contract bindings
         working-directory: e2e
@@ -54,7 +54,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           repository: fanwaave/fanwaave-clients
-          ref: 4eee096352a714dd27487e685710827f370b260d
+          ref: ccee778740af47384f221b3b6f99c48258873ec2
           path: external/fanwaave-clients
           persist-credentials: false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -65,7 +65,7 @@ jobs:
           persist-credentials: false
       - name: Verify exact candidate Git SHAs
         run: |
-          test "$(git -C external/fanwaave-clients rev-parse HEAD)" = "4eee096352a714dd27487e685710827f370b260d"
+          test "$(git -C external/fanwaave-clients rev-parse HEAD)" = "ccee778740af47384f221b3b6f99c48258873ec2"
           test "$(git -C external/fanwaave-interfaces rev-parse HEAD)" = "4c81583c33bfab187ac4520b87f416550a4aed71"
       - uses: dtolnay/rust-toolchain@4360b52568e2003a75bf9bc1d59f33a8e3fc893c
         with:

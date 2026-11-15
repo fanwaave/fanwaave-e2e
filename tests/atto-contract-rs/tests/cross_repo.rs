@@ -78,7 +78,9 @@ fn validate(client: &Value, rpc: &Value, atto: &Value, schema: &Value) -> Result
         return Err("unexpected interface field");
     }
     let required = atto["required"].as_array().ok_or("missing required")?;
-    let authored = schema["required"].as_array().ok_or("missing schema required")?;
+    let authored = schema["required"]
+        .as_array()
+        .ok_or("missing schema required")?;
     if required.len() != needed.len() || authored.len() != needed.len() {
         return Err("incomplete required fields");
     }
