@@ -1,7 +1,7 @@
 #![forbid(unsafe_code)]
 use serde_json::{json, Value};
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 fn root(env: &str, fallback: &str) -> PathBuf {
     let path = std::env::var(env).unwrap_or_else(|_| fallback.to_owned());
@@ -14,7 +14,7 @@ fn root(env: &str, fallback: &str) -> PathBuf {
             .join(source)
     }
 }
-fn read_json(root: &PathBuf, relative: &str) -> Value {
+fn read_json(root: &Path, relative: &str) -> Value {
     let content = fs::read_to_string(root.join(relative)).expect("read exact candidate file");
     serde_json::from_str(&content).expect("parse authoritative JSON")
 }
