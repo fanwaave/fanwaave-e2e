@@ -11,3 +11,7 @@ End-to-end, integration, and contract tests for `fanwaave`. Sibling production c
 To run the policy check locally, set `FANWAAVE_CLIENTS_CHECKOUT` and `FANWAAVE_INTERFACES_CHECKOUT` to local candidate trees and run `node tests/atto-contracts.e2e.mjs`. For optional executable conformance also set `ATTOC` to a compiler executable built from an independently verified source SHA, then run `node tests/atto-execution.e2e.mjs`.
 
 These are still not proof of production HTTP transports, full JSON Schema validation, or general AttoLang language parity. Update pinned SHAs only after independently verifying new PR heads.
+
+## Rust-first cross-repository contract tests
+
+The required new cross-repository conformance suite is now a small Rust crate at `tests/atto-contract-rs`. It tests the exact client and interface PR candidates, compares their authored JSON contract fields, and rejects negative authority/security changes. Run it with `cargo test --manifest-path tests/atto-contract-rs/Cargo.toml --all-targets`, setting the two checkout environment variables to the verified exact candidate trees. The existing Node-based contract smoke remains until cross-runner parity is reviewed. No Python scripts are introduced. Native .atto execution remains separately blocked on access to the private upstream compiler source.
